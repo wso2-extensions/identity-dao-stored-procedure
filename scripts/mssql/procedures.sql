@@ -22,17 +22,15 @@ CREATE PROCEDURE InitScopeClaimMapping(
     @CLAIMS AS dbo.IDN_OIDC_SCOPE_CLAIMS READONLY)
     AS
 BEGIN
-
-	SET NOCOUNT ON;
+    SET NOCOUNT ON;
     BEGIN TRANSACTION;
-	SAVE TRANSACTION transactionSavePoint;
-
+    SAVE TRANSACTION transactionSavePoint;
     BEGIN TRY
 
         DECLARE @RESULT table (NAME VARCHAR(255), ID INTEGER);
 
-		DECLARE @scopeRowCnt INT = (SELECT COUNT(SCOPE_ID) FROM @SCOPES);
-		DECLARE @scopeId INT = 0;
+        DECLARE @scopeRowCnt INT = (SELECT COUNT(SCOPE_ID) FROM @SCOPES);
+        DECLARE @scopeId INT = 0;
 
         -- Looping through each OIDC scope.
         WHILE @scopeId < @scopeRowCnt
@@ -43,26 +41,23 @@ BEGIN
             -- Getting the auto generated scope id of the inserted scope.
             DECLARE @generatedScopeId int = (SELECT TOP 1 ID FROM @RESULT WHERE NAME IN (SELECT NAME FROM @SCOPES WHERE SCOPE_ID = @scopeId));
 
-			DECLARE @claimRowCnt INT = (SELECT COUNT(*) FROM @CLAIMS WHERE SCOPE_ID = @scopeId);
-			DECLARE @claimId INT = 0;
-			DECLARE @claim NVARCHAR(255);
+            DECLARE @claimRowCnt INT = (SELECT COUNT(*) FROM @CLAIMS WHERE SCOPE_ID = @scopeId);
+            DECLARE @claimId INT = 0;
+            DECLARE @claim NVARCHAR(255);
 
             -- Looping through claims of the inserted scope.
             WHILE @claimId < @claimRowCnt
             BEGIN
+                -- The claim which needs to be added for this iteration.
+                SELECT @claim = CLAIM FROM @CLAIMS WHERE CLAIM_ID = @claimId AND SCOPE_ID = @scopeId;
 
-            -- The claim which needs to be added for this iteration.
-            SELECT @claim = CLAIM FROM @CLAIMS WHERE CLAIM_ID = @claimId AND SCOPE_ID = @scopeId;
-
-            -- Inserting the claim entry for the scope.
-            INSERT INTO IDN_OIDC_SCOPE_CLAIM_MAPPING (SCOPE_ID, EXTERNAL_CLAIM_ID) SELECT @generatedScopeId, IDN_CLAIM.ID FROM IDN_CLAIM LEFT JOIN IDN_CLAIM_DIALECT ON IDN_CLAIM_DIALECT.ID = IDN_CLAIM.DIALECT_ID WHERE CLAIM_URI=@claim AND IDN_CLAIM_DIALECT.DIALECT_URI='http://wso2.org/oidc/claim' AND IDN_CLAIM_DIALECT.TENANT_ID=@tenantId
+                -- Inserting the claim entry for the scope.
+                INSERT INTO IDN_OIDC_SCOPE_CLAIM_MAPPING (SCOPE_ID, EXTERNAL_CLAIM_ID) SELECT @generatedScopeId, IDN_CLAIM.ID FROM IDN_CLAIM LEFT JOIN IDN_CLAIM_DIALECT ON IDN_CLAIM_DIALECT.ID = IDN_CLAIM.DIALECT_ID WHERE CLAIM_URI=@claim AND IDN_CLAIM_DIALECT.DIALECT_URI='http://wso2.org/oidc/claim' AND IDN_CLAIM_DIALECT.TENANT_ID=@tenantId
 
                 SET @claimId += 1;
             END;
-
-		   	SET @scopeId += 1;
+            SET @scopeId += 1;
         END;
-
         -- Committing the transaction if all the scope claims mapping added correctly.
         COMMIT TRANSACTION;
     END TRY
