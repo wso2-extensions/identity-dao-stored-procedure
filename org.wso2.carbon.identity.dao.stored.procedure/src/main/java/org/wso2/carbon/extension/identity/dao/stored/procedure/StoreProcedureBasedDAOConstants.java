@@ -35,6 +35,6 @@ public class StoreProcedureBasedDAOConstants {
     protected static final String ARG_TENANT_ID = "tenantId";
     protected static final String ARG_SCOPES = "SCOPES";
     protected static final String ARG_CLAIMS = "CLAIMS";
-    protected static final String DBO_IDN_OAUTH_2_SCOPE = "dbo.IDN_OAUTH2_SCOPE";
-    protected static final String DBO_IDN_OIDC_SCOPE_CLAIMS = "dbo.IDN_OIDC_SCOPE_CLAIMS";
+    protected static final String DATA_TYPE_IDN_OAUTH_2_SCOPE = "IDN_OAUTH2_SCOPE";
+    protected static final String DATA_TYPE_IDN_OIDC_SCOPE_CLAIMS = "IDN_OIDC_SCOPE_CLAIMS";
 }

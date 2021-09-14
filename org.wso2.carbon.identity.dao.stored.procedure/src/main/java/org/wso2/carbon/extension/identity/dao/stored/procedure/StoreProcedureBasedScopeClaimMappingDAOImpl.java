@@ -42,9 +42,9 @@ import static org.wso2.carbon.extension.identity.dao.stored.procedure.StoreProce
 import static org.wso2.carbon.extension.identity.dao.stored.procedure.StoreProcedureBasedDAOConstants.CLAIM;
 import static org.wso2.carbon.extension.identity.dao.stored.procedure.StoreProcedureBasedDAOConstants.CLAIM_ID;
 import static org.wso2.carbon.extension.identity.dao.stored.procedure.StoreProcedureBasedDAOConstants
-        .DBO_IDN_OAUTH_2_SCOPE;
+        .DATA_TYPE_IDN_OAUTH_2_SCOPE;
 import static org.wso2.carbon.extension.identity.dao.stored.procedure.StoreProcedureBasedDAOConstants
-        .DBO_IDN_OIDC_SCOPE_CLAIMS;
+        .DATA_TYPE_IDN_OIDC_SCOPE_CLAIMS;
 import static org.wso2.carbon.extension.identity.dao.stored.procedure.StoreProcedureBasedDAOConstants.DESCRIPTION;
 import static org.wso2.carbon.extension.identity.dao.stored.procedure.StoreProcedureBasedDAOConstants.DISPLAY_NAME;
 import static org.wso2.carbon.extension.identity.dao.stored.procedure.StoreProcedureBasedDAOConstants.NAME;
@@ -89,8 +89,8 @@ public class StoreProcedureBasedScopeClaimMappingDAOImpl extends ScopeClaimMappi
                     // The CallableStatement object can unwrap to SQLServerCallableStatement.
                     SQLServerCallableStatement sqlCstmt = stmt.unwrap(SQLServerCallableStatement.class);
                     sqlCstmt.setInt(ARG_TENANT_ID, tenantId);
-                    sqlCstmt.setStructured(ARG_SCOPES, DBO_IDN_OAUTH_2_SCOPE, scopesDataTable);
-                    sqlCstmt.setStructured(ARG_CLAIMS, DBO_IDN_OIDC_SCOPE_CLAIMS, claimsDataTable);
+                    sqlCstmt.setStructured(ARG_SCOPES, DATA_TYPE_IDN_OAUTH_2_SCOPE, scopesDataTable);
+                    sqlCstmt.setStructured(ARG_CLAIMS, DATA_TYPE_IDN_OIDC_SCOPE_CLAIMS, claimsDataTable);
                     sqlCstmt.execute();
                 } else {
                     String errorMessage = "Cannot process scope init for the tenant: " + tenantId;
