@@ -31,7 +31,7 @@
     <artifactId>org.wso2.carbon.identity.dao.stored.procedure</artifactId>
 
     <packaging>bundle</packaging>
-    <name>Store Procedure DAO Implementation of Identity components</name>
+    <name>Stored Procedure DAO Implementation of Identity components</name>
 
     <build>
         <plugins>
@@ -85,7 +85,6 @@
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
-            <version>6.4.0.jre8</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.identity.framework</groupId>

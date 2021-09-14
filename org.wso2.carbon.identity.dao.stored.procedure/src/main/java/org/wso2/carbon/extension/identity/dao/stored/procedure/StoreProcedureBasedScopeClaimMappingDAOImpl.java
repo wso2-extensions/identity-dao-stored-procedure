@@ -52,7 +52,7 @@ import static org.wso2.carbon.extension.identity.dao.stored.procedure.StoreProce
 import static org.wso2.carbon.extension.identity.dao.stored.procedure.StoreProcedureBasedDAOConstants.SCOPE_TYPE;
 
 /**
- * Store Procedure Based OIDC Scope Claim mapping DAO.
+ * Stored Procedure Based OIDC Scope Claim mapping DAO.
  */
 public class StoreProcedureBasedScopeClaimMappingDAOImpl extends ScopeClaimMappingDAOImpl {
 
@@ -97,11 +97,12 @@ public class StoreProcedureBasedScopeClaimMappingDAOImpl extends ScopeClaimMappi
                     throw new IdentityOAuth2Exception(errorMessage);
                 }
             }
-            dbConnection.commit();
+            IdentityDatabaseUtil.commitTransaction(dbConnection);
             if (log.isDebugEnabled()) {
                 log.debug("The scopes successfully inserted for the tenant: " + tenantId);
             }
         } catch (SQLException e) {
+            IdentityDatabaseUtil.rollbackTransaction(dbConnection);
             String errorMessage = "Error while persisting claims for the scope for the tenant: " + tenantId;
             throw new IdentityOAuth2Exception(errorMessage, e);
         } finally {

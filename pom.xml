@@ -44,7 +44,7 @@
     </modules>
 
     <packaging>pom</packaging>
-    <name>Store Procedure DAO Implementation of Identity components</name>
+    <name>Stored Procedure DAO Implementation of Identity components</name>
 
     <build>
         <pluginManagement>

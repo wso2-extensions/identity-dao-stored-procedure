@@ -38,7 +38,7 @@ import java.sql.Connection;
 import java.util.Map;
 
 /**
- * The component for the Store Procedure Based DAO.
+ * The component for the Stored Procedure Based DAO.
  */
 @Component(
         name = "extension.identity.dao.stored.procedure",
@@ -63,18 +63,18 @@ public class StoreProcedureBasedDAOComponent {
                     componentContext.getBundleContext().registerService(ScopeClaimMappingDAO.class.getName(),
                             new StoreProcedureBasedScopeClaimMappingDAOImpl(), null);
                 } else {
-                    log.warn("The Store Procedure Based Scope Claim Mapping DAO implementation is not support for " +
-                            databaseType + ". So the default DAO implementation will be used");
+                    log.warn("The Stored Procedure Based Scope Claim Mapping DAO implementation is not support" +
+                            " for : " + databaseType + ". Hence the default DAO implementation will be used");
                 }
             } finally {
                 IdentityDatabaseUtil.closeConnection(dbConnection);
             }
         } else {
-            log.info("The Store Procedure Based Scope Claim Mapping DAO implementation is not registered. " +
-                    " As oidc_scope_claim_mapping is not enabled with the configuration.");
+            log.info("The Stored Procedure Based Scope Claim Mapping DAO implementation is not registered. " +
+                    " Because oidc_scope_claim_mapping is not enabled with the configuration.");
         }
         if (log.isDebugEnabled()) {
-            log.debug("Store Procedure Based DAO Component Activated.");
+            log.debug("Stored Procedure Based DAO Component Activated.");
         }
     }
 
@@ -82,7 +82,7 @@ public class StoreProcedureBasedDAOComponent {
     protected void deactivate(ComponentContext componentContext) {
 
         if (log.isDebugEnabled()) {
-            log.debug("Store Procedure Based DAO Component Deactivated.");
+            log.debug("Stored Procedure Based DAO Component Deactivated.");
         }
     }
 

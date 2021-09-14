@@ -19,7 +19,7 @@
 package org.wso2.carbon.extension.identity.dao.stored.procedure;
 
 /**
- * Constants used for the Store Procedure Based DAOs.
+ * Constants used for the Stored Procedure Based DAOs.
  */
 public class StoreProcedureBasedDAOConstants {
 
