@@ -21,8 +21,9 @@ This supported from wso2 Identity Server 5.12.0 for the creating the OIDC scope 
 - Create the Stored Procedure in the Microsoft SQL Database using the `scripts/mssql/procedures.sql`
   
 - Add the following configuration to `<IS_HOME>/repository/config/deployment.toml` to enable the Stored Procedure 
-  based DAO Implementation for the OIDC Scope Claim Mapping.
+  based DAO Implementation for the OIDC Scope Claim Mapping and Claim configuration.
     ```
     [stored_procedure_dao]
     oidc_scope_claim_mapping = true
+    claim_config_init = true
     ```

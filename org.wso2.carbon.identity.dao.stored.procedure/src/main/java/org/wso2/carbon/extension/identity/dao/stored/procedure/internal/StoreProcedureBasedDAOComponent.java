@@ -27,7 +27,9 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.wso2.carbon.extension.identity.dao.stored.procedure.StoreProcedureBasedClaimConfigInitDAO;
 import org.wso2.carbon.extension.identity.dao.stored.procedure.StoreProcedureBasedScopeClaimMappingDAOImpl;
+import org.wso2.carbon.identity.claim.metadata.mgt.dao.ClaimConfigInitDAO;
 import org.wso2.carbon.identity.core.persistence.IdentityDBInitializer;
 import org.wso2.carbon.identity.core.util.IdentityCoreInitializedEvent;
 import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
@@ -48,6 +50,7 @@ public class StoreProcedureBasedDAOComponent {
 
     private static final Log log = LogFactory.getLog(StoreProcedureBasedDAOComponent.class);
     private static final String OIDC_SCOPE_CLAIM_MAPPING_DAO_NAME = "oidc_scope_claim_mapping";
+    private static final String CLAIM_CONFIG_INIT_DAO_NAME = "claim_config_init";
     private static final String MSSQL = "mssql";
 
     @Activate
@@ -73,6 +76,27 @@ public class StoreProcedureBasedDAOComponent {
             log.info("The Stored Procedure Based Scope Claim Mapping DAO implementation is not registered. " +
                     " Because oidc_scope_claim_mapping is not enabled with the configuration.");
         }
+
+        Boolean claimConfigInitDAOEnabled = storeProcedureBasedDAOConfig.get(CLAIM_CONFIG_INIT_DAO_NAME);
+        if (claimConfigInitDAOEnabled) {
+            Connection dbConnection = IdentityDatabaseUtil.getDBConnection(false);
+            try {
+                String databaseType = IdentityDBInitializer.getDatabaseType(dbConnection);
+                if (MSSQL.equals(databaseType)) {
+                    componentContext.getBundleContext().registerService(ClaimConfigInitDAO.class.getName(),
+                            new StoreProcedureBasedClaimConfigInitDAO(), null);
+                } else {
+                    log.warn("The Stored Procedure Based Claim Config Init DAO implementation is not support" +
+                            " for : " + databaseType + ". Hence the default DAO implementation will be used");
+                }
+            } finally {
+                IdentityDatabaseUtil.closeConnection(dbConnection);
+            }
+        } else {
+            log.info("The Stored Procedure Based Claim Config Init DAO implementation is not registered. " +
+                    " Because claim_config_init is not enabled with the configuration.");
+        }
+
         if (log.isDebugEnabled()) {
             log.debug("Stored Procedure Based DAO Component Activated.");
         }
