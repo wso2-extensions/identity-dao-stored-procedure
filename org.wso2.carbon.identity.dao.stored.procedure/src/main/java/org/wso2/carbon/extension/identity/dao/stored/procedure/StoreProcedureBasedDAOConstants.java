@@ -31,7 +31,7 @@ public class StoreProcedureBasedDAOConstants {
     protected static final String SCOPE_TYPE = "SCOPE_TYPE";
     protected static final String CLAIM_ID = "CLAIM_ID";
     protected static final String CLAIM = "CLAIM";
-    protected static final String CALL_INIT_SCOPE_CLAIM_MAPPING = "{call dbo.InitScopeClaimMapping(?, ?, ?)}";
+    protected static final String CALL_INIT_SCOPE_CLAIM_MAPPING = "{call InitScopeClaimMapping(?, ?, ?)}";
     protected static final String ARG_TENANT_ID = "tenantId";
     protected static final String ARG_SCOPES = "SCOPES";
     protected static final String ARG_CLAIMS = "CLAIMS";
