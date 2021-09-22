@@ -28,13 +28,13 @@
 
     <groupId>org.wso2.carbon.extension.identity.dao.stored.procedure</groupId>
     <artifactId>identity-dao-stored-procedure</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.2</version>
 
     <scm>
         <url>https://github.com/wso2-extensions/identity-dao-stored-procedure.git</url>
         <developerConnection>scm:git:https://github.com/wso2-extensions/identity-dao-stored-procedure.git</developerConnection>
         <connection>scm:git:https://github.com/wso2-extensions/identity-dao-stored-procedure.git</connection>
-        <tag>HEAD</tag>
+        <tag>v1.0.2</tag>
     </scm>
 
     <modules>
