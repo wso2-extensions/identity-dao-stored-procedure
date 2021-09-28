@@ -48,7 +48,7 @@ public class StoreProcedureBasedDAOConstants {
     protected static final String ATTRIBUTE_NAME = "ATTRIBUTE_NAME";
     protected static final String PROPERTY_NAME = "PROPERTY_NAME";
     protected static final String PROPERTY_VALUE = "PROPERTY_VALUE";
-    protected static final String CALL_INIT_CLAIM_CONFIG = "{call dbo.InitClaimConfig(?, ?, ?, ?, ?, ?)}";
+    protected static final String CALL_INIT_CLAIM_CONFIG = "{call InitClaimConfig(?, ?, ?, ?, ?, ?)}";
     protected static final String ARG_CLAIM_DIALECTS = "CLAIM_DIALECTS";
     protected static final String ARG_CLAIM_MAPPED_ATTRIBUTE = "CLAIM_MAPPED_ATTRIBUTE";
     protected static final String ARG_CLAIM_PROPERTY = "CLAIM_PROPERTY";
