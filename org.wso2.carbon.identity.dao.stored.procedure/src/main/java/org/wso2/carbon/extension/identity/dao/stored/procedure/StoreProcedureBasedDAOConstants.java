@@ -37,4 +37,25 @@ public class StoreProcedureBasedDAOConstants {
     protected static final String ARG_CLAIMS = "CLAIMS";
     protected static final String DATA_TYPE_IDN_OAUTH_2_SCOPE = "DT_IDN_OAUTH2_SCOPE";
     protected static final String DATA_TYPE_IDN_OIDC_SCOPE_CLAIMS = "DT_IDN_OIDC_SCOPE_CLAIMS";
+
+    // Constants for Scope Config Init DAO.
+    protected static final String DIALECT_ID = "DIALECT_ID";
+    protected static final String DIALECT_URI = "DIALECT_URI";
+    protected static final String CLAIM_URI = "CLAIM_URI";
+    protected static final String MAPPED_CLAIM_URI = "MAPPED_CLAIM_URI";
+    protected static final String ID = "ID";
+    protected static final String USER_STORE_DOMAIN_NAME = "USER_STORE_DOMAIN_NAME";
+    protected static final String ATTRIBUTE_NAME = "ATTRIBUTE_NAME";
+    protected static final String PROPERTY_NAME = "PROPERTY_NAME";
+    protected static final String PROPERTY_VALUE = "PROPERTY_VALUE";
+    protected static final String CALL_INIT_CLAIM_CONFIG = "{call InitClaimConfig(?, ?, ?, ?, ?, ?)}";
+    protected static final String ARG_CLAIM_DIALECTS = "CLAIM_DIALECTS";
+    protected static final String ARG_CLAIM_MAPPED_ATTRIBUTE = "CLAIM_MAPPED_ATTRIBUTE";
+    protected static final String ARG_CLAIM_PROPERTY = "CLAIM_PROPERTY";
+    protected static final String ARG_CLAIM_MAPPING = "CLAIM_MAPPING";
+    protected static final String DATA_TYPE_IDN_CLAIM_DIALECT = "DT_IDN_CLAIM_DIALECT";
+    protected static final String DATA_TYPE_IDN_CLAIM = "DT_IDN_CLAIM";
+    protected static final String DATA_TYPE_IDN_CLAIM_MAPPED_ATTRIBUTE = "DT_IDN_CLAIM_MAPPED_ATTRIBUTE";
+    protected static final String DATA_TYPE_IDN_CLAIM_PROPERTY = "DT_IDN_CLAIM_PROPERTY";
+    protected static final String DATA_TYPE_IDN_CLAIM_MAPPING = "DT_CLAIM_MAPPING";
 }

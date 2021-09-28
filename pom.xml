@@ -92,6 +92,11 @@
                 <version>${carbon.identity.framework.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.wso2.carbon.identity.framework</groupId>
+                <artifactId>org.wso2.carbon.identity.claim.metadata.mgt</artifactId>
+                <version>${carbon.identity.framework.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.microsoft.sqlserver</groupId>
                 <artifactId>mssql-jdbc</artifactId>
                 <version>${microsoft.sql.jdbc.version}</version>
@@ -100,11 +105,12 @@
     </dependencyManagement>
 
     <properties>
-        <carbon.identity.framework.version>5.20.188</carbon.identity.framework.version>
+        <carbon.identity.framework.version>5.20.198</carbon.identity.framework.version>
         <identity.inbound.oauth.version>6.7.39</identity.inbound.oauth.version>
         <microsoft.sql.jdbc.version>6.4.0.jre8</microsoft.sql.jdbc.version>
 
-        <carbon.identity.framework.imp.pkg.version.range>[5.20.188, 6.0.0)
+        <carbon.kernel.package.import.version.range>[4.5.0, 5.0.0)</carbon.kernel.package.import.version.range>
+        <carbon.identity.framework.imp.pkg.version.range>[5.20.198, 6.0.0)
         </carbon.identity.framework.imp.pkg.version.range>
         <identity.inbound.oauth.osgi.version.range>[6.7.39, 7.0.0)</identity.inbound.oauth.osgi.version.range>
         <microsoft.sql.jdbc.version.range>[0.0.0, 1.0.0]</microsoft.sql.jdbc.version.range>

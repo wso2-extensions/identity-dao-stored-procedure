@@ -62,8 +62,13 @@
                             org.osgi.framework; version="${osgi.framework.imp.pkg.version.range}",
                             org.osgi.service.component; version="${osgi.service.component.imp.pkg.version.range}",
                             org.apache.commons.logging; version="${commons-logging.osgi.version.range}",
+                            org.wso2.carbon.user.core.claim; version="${carbon.kernel.package.import.version.range}",
+                            org.wso2.carbon.user.core.claim.inmemory; version="${carbon.kernel.package.import.version.range}",
                             org.wso2.carbon.identity.core.persistence; version="${carbon.identity.framework.imp.pkg.version.range}",
                             org.wso2.carbon.identity.core.util; version="${carbon.identity.framework.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.claim.metadata.mgt.exception; version="${carbon.identity.framework.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.claim.metadata.mgt.dao; version="${carbon.identity.framework.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.claim.metadata.mgt.util; version="${carbon.identity.framework.imp.pkg.version.range}",
                             org.wso2.carbon.identity.oauth.dto; version="${identity.inbound.oauth.osgi.version.range}",
                             org.wso2.carbon.identity.oauth2; version="${identity.inbound.oauth.osgi.version.range}",
                             org.wso2.carbon.identity.openidconnect.dao; version="${identity.inbound.oauth.osgi.version.range}",
@@ -79,6 +84,10 @@
         <dependency>
             <groupId>org.wso2.carbon.identity.inbound.auth.oauth2</groupId>
             <artifactId>org.wso2.carbon.identity.oauth</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.framework</groupId>
+            <artifactId>org.wso2.carbon.identity.claim.metadata.mgt</artifactId>
         </dependency>
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
