@@ -50,6 +50,7 @@ import static org.wso2.carbon.extension.identity.dao.stored.procedure.StoreProce
 import static org.wso2.carbon.extension.identity.dao.stored.procedure.StoreProcedureBasedDAOConstants.NAME;
 import static org.wso2.carbon.extension.identity.dao.stored.procedure.StoreProcedureBasedDAOConstants.SCOPE_ID;
 import static org.wso2.carbon.extension.identity.dao.stored.procedure.StoreProcedureBasedDAOConstants.SCOPE_TYPE;
+import static org.wso2.carbon.extension.identity.dao.stored.procedure.internal.CorrelationLoggerUtil.logQueryDetails;
 
 /**
  * Stored Procedure Based OIDC Scope Claim mapping DAO.
@@ -88,10 +89,13 @@ public class StoreProcedureBasedScopeClaimMappingDAOImpl extends ScopeClaimMappi
                 if (stmt.isWrapperFor(SQLServerCallableStatement.class)) {
                     // The CallableStatement object can unwrap to SQLServerCallableStatement.
                     SQLServerCallableStatement sqlCstmt = stmt.unwrap(SQLServerCallableStatement.class);
+                    long start = System.currentTimeMillis();
                     sqlCstmt.setInt(ARG_TENANT_ID, tenantId);
                     sqlCstmt.setStructured(ARG_SCOPES, DATA_TYPE_IDN_OAUTH_2_SCOPE, scopesDataTable);
                     sqlCstmt.setStructured(ARG_CLAIMS, DATA_TYPE_IDN_OIDC_SCOPE_CLAIMS, claimsDataTable);
                     sqlCstmt.execute();
+                    long delta = System.currentTimeMillis() - start;
+                    logQueryDetails(sqlCstmt, CALL_INIT_SCOPE_CLAIM_MAPPING, delta, start);
                 } else {
                     String errorMessage = "Cannot process scope init for the tenant: " + tenantId;
                     throw new IdentityOAuth2Exception(errorMessage);
