@@ -110,7 +110,7 @@
         <microsoft.sql.jdbc.version>6.4.0.jre8</microsoft.sql.jdbc.version>
 
         <carbon.kernel.package.import.version.range>[4.5.0, 5.0.0)</carbon.kernel.package.import.version.range>
-        <carbon.identity.framework.imp.pkg.version.range>[5.20.198, 6.0.0)
+        <carbon.identity.framework.imp.pkg.version.range>[5.20.198, 7.0.0)
         </carbon.identity.framework.imp.pkg.version.range>
         <identity.inbound.oauth.osgi.version.range>[6.7.39, 7.0.0)</identity.inbound.oauth.osgi.version.range>
         <microsoft.sql.jdbc.version.range>[0.0.0, 1.0.0]</microsoft.sql.jdbc.version.range>
