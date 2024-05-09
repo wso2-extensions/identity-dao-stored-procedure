@@ -62,6 +62,11 @@ public class StoreProcedureBasedScopeClaimMappingDAOImpl extends ScopeClaimMappi
     @Override
     public void initScopeClaimMapping(int tenantId, List<ScopeDTO> scopeClaimsList) throws IdentityOAuth2Exception {
 
+        log.info("Scope Claim List size: " + scopeClaimsList.size());
+        scopeClaimsList.forEach(scopeDTO -> {
+            System.out.println("Scope name: " + scopeDTO.getName());
+            System.out.println("Associated claims count: " + scopeDTO.getClaim().length);
+        });
         Connection dbConnection = IdentityDatabaseUtil.getDBConnection(true);
         try {
             SQLServerDataTable scopesDataTable = new SQLServerDataTable();
@@ -94,10 +99,12 @@ public class StoreProcedureBasedScopeClaimMappingDAOImpl extends ScopeClaimMappi
                     sqlCstmt.setStructured(ARG_SCOPES, DATA_TYPE_IDN_OAUTH_2_SCOPE, scopesDataTable);
                     sqlCstmt.setStructured(ARG_CLAIMS, DATA_TYPE_IDN_OIDC_SCOPE_CLAIMS, claimsDataTable);
                     sqlCstmt.execute();
+                    log.info("Scopes and claims updated successfully");
                     long delta = System.currentTimeMillis() - start;
                     logQueryDetails(sqlCstmt, CALL_INIT_SCOPE_CLAIM_MAPPING, delta, start);
                 } else {
                     String errorMessage = "Cannot process scope init for the tenant: " + tenantId;
+                    log.error(errorMessage);
                     throw new IdentityOAuth2Exception(errorMessage);
                 }
             }
@@ -105,9 +112,11 @@ public class StoreProcedureBasedScopeClaimMappingDAOImpl extends ScopeClaimMappi
             if (log.isDebugEnabled()) {
                 log.debug("The scopes successfully inserted for the tenant: " + tenantId);
             }
+            log.info("Scope and claim update transaction commited");
         } catch (SQLException e) {
             IdentityDatabaseUtil.rollbackTransaction(dbConnection);
             String errorMessage = "Error while persisting claims for the scope for the tenant: " + tenantId;
+            log.error(errorMessage);
             throw new IdentityOAuth2Exception(errorMessage, e);
         } finally {
             IdentityDatabaseUtil.closeConnection(dbConnection);
