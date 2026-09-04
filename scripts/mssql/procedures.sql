@@ -91,6 +91,19 @@ BEGIN
         -- Table to store claim ID.
         DECLARE @CLAIM_RESULT table (DIALET_ID INTEGER, CLAIM_ID INTEGER , GEN_ID INTEGER, CLAIM_URI VARCHAR (255));
 
+        -- Loop variables. Declared once up front, since T-SQL scopes DECLARE to the whole batch and
+        -- not to the loop body.
+        DECLARE @genDialectId INT;
+        DECLARE @claimRowCnt INT;
+        DECLARE @claimId INT;
+        DECLARE @genClaimId INT;
+        DECLARE @mappedClaimURI VARCHAR (255);
+        DECLARE @mappedClaimId INT;
+        DECLARE @attributeRowCnt INT;
+        DECLARE @attributeId INT;
+        DECLARE @propertyRowCnt INT;
+        DECLARE @propertyId INT;
+        DECLARE @msg NVARCHAR(2048);
 
         -- Looping through each claim dialect.
         DECLARE @dialectRowCnt INT = (SELECT COUNT(DIALECT_ID) FROM @CLAIM_DIALECTS);
@@ -100,52 +113,69 @@ BEGIN
             -- Inserting the claim dialect and get the dialectId
             INSERT INTO IDN_CLAIM_DIALECT (DIALECT_URI, TENANT_ID) OUTPUT @dialectId, Inserted.ID into @CLAIM_DIALECTS_RESULT SELECT DIALECT_URI, @tenantId FROM @CLAIM_DIALECTS WHERE DIALECT_ID  = @dialectId;
 
-            DECLARE @genDialectId INT = (SELECT GEN_ID FROM @CLAIM_DIALECTS_RESULT WHERE DIALET_ID = @dialectId);
+            SET @genDialectId = (SELECT GEN_ID FROM @CLAIM_DIALECTS_RESULT WHERE DIALET_ID = @dialectId);
 
             -- Looping through each claims.
-            DECLARE @claimRowCnt INT = (SELECT COUNT(CLAIM_ID) FROM @CLAIMS WHERE DIALECT_ID = @dialectId);
-            DECLARE @claimId INT = 0;
+            SET @claimRowCnt = (SELECT COUNT(CLAIM_ID) FROM @CLAIMS WHERE DIALECT_ID = @dialectId);
+            SET @claimId = 0;
             WHILE @claimId < @claimRowCnt
             BEGIN
-                -- Inserting the claim and get the claimId
-                INSERT INTO IDN_CLAIM (DIALECT_ID, CLAIM_URI, TENANT_ID) OUTPUT @dialectId, @claimId, Inserted.ID, Inserted.CLAIM_URI  into @CLAIM_RESULT SELECT @genDialectId, CLAIM_URI, @tenantId FROM @CLAIMS WHERE DIALECT_ID =  @dialectId AND CLAIM_ID = @claimID;
-
-                DECLARE @genClaimId INT = (SELECT GEN_ID FROM @CLAIM_RESULT WHERE DIALET_ID = @dialectId AND CLAIM_ID = @claimId);
-
-                -- Adding claim mapping for the remote claims
-                DECLARE @mappedClaimURI VARCHAR (255) = (SELECT MAPPED_CLAIM_URI FROM @CLAIM_MAPPING WHERE DIALECT_ID = @dialectId AND CLAIM_ID = @claimId);
-                IF ((@mappedClaimURI IS NOT NULL) OR (LEN(@mappedClaimURI) > 0))
+                -- Resolving the mapped local claim of the remote claim before the claim itself is
+                -- inserted, so that an unresolvable mapping can be skipped without leaving an
+                -- external claim behind that has no entry in IDN_CLAIM_MAPPING.
+                SET @mappedClaimURI = (SELECT MAPPED_CLAIM_URI FROM @CLAIM_MAPPING WHERE DIALECT_ID = @dialectId AND CLAIM_ID = @claimId);
+                SET @mappedClaimId = NULL;
+                IF (@mappedClaimURI IS NOT NULL AND LEN(@mappedClaimURI) > 0)
                 BEGIN
-                    DECLARE @mappedClaimId INT = (SELECT GEN_ID FROM @CLAIM_RESULT WHERE DIALET_ID = 0 AND CLAIM_URI = @mappedClaimURI);
-                    IF ((@mappedClaimId IS NOT NULL) OR (LEN(@mappedClaimId) > 0))
+                    -- The local claim dialect is always inserted first, as dialect 0, so every local
+                    -- claim of this tenant is already in @CLAIM_RESULT by the time remote dialects
+                    -- are processed.
+                    SET @mappedClaimId = (SELECT GEN_ID FROM @CLAIM_RESULT WHERE DIALET_ID = 0 AND CLAIM_URI = @mappedClaimURI);
+                END
+
+                IF (@mappedClaimURI IS NOT NULL AND LEN(@mappedClaimURI) > 0 AND @mappedClaimId IS NULL)
+                BEGIN
+                    -- The mapped local claim URI is not declared as a local claim in the claim
+                    -- configuration. Skip only this remote claim and carry on with the rest, so a
+                    -- single dangling mapping cannot leave the tenant with no claim metadata at all.
+                    -- This matches DefaultClaimConfigInitDAO, which logs and continues per claim.
+                    SET @msg = 'Skipping the remote claim of dialect ' + CAST(@dialectId AS NVARCHAR(10)) + ' as the Mapped Claim id is not found for the mapped local claim URI ' + @mappedClaimURI;
+                    -- Severity 10 keeps this an informational message: it reaches the client as a
+                    -- warning on the connection instead of aborting the batch.
+                    RAISERROR (@msg, 10, 1) WITH NOWAIT;
+                END
+                ELSE
+                BEGIN
+                    -- Inserting the claim and get the claimId
+                    INSERT INTO IDN_CLAIM (DIALECT_ID, CLAIM_URI, TENANT_ID) OUTPUT @dialectId, @claimId, Inserted.ID, Inserted.CLAIM_URI  into @CLAIM_RESULT SELECT @genDialectId, CLAIM_URI, @tenantId FROM @CLAIMS WHERE DIALECT_ID =  @dialectId AND CLAIM_ID = @claimID;
+
+                    SET @genClaimId = (SELECT GEN_ID FROM @CLAIM_RESULT WHERE DIALET_ID = @dialectId AND CLAIM_ID = @claimId);
+
+                    -- Adding claim mapping for the remote claims
+                    IF (@mappedClaimId IS NOT NULL)
                     BEGIN
                         INSERT INTO IDN_CLAIM_MAPPING (MAPPED_LOCAL_CLAIM_ID, EXT_CLAIM_ID, TENANT_ID) VALUES (@mappedClaimId, @genClaimId, @tenantId);
                     END
-                    ELSE BEGIN
-                        -- Mapped Claim id is not found for the mapped local claim URI throw exception
-                        DECLARE @msg NVARCHAR(2048) = 'The  Mapped Claim id is not found for the mapped local claim URI ' + @mappedClaimURI;
-                        THROW 51000, @msg, 1;
+
+                    -- Looping through each claim mapped attribute.
+                    SET @attributeRowCnt = (SELECT COUNT(CLAIM_ID) FROM @CLAIM_MAPPED_ATTRIBUTE WHERE DIALECT_ID = @dialectId AND CLAIM_ID = @claimId);
+                    SET @attributeId = 0;
+                    WHILE @attributeId < @attributeRowCnt
+                    BEGIN
+                        -- Inserting the claim mapped attribute.
+                        INSERT INTO IDN_CLAIM_MAPPED_ATTRIBUTE (LOCAL_CLAIM_ID, USER_STORE_DOMAIN_NAME, ATTRIBUTE_NAME, TENANT_ID) SELECT @genClaimId, USER_STORE_DOMAIN_NAME, ATTRIBUTE_NAME, @tenantId FROM @CLAIM_MAPPED_ATTRIBUTE WHERE DIALECT_ID =  @dialectId AND CLAIM_ID = @claimID AND ID = @attributeId;
+                        SET @attributeId += 1;
                     END
-                END
 
-                -- Looping through each claim mapped attribute.
-                DECLARE @attributeRowCnt INT = (SELECT COUNT(CLAIM_ID) FROM @CLAIM_MAPPED_ATTRIBUTE WHERE DIALECT_ID = @dialectId AND CLAIM_ID = @claimId);
-                DECLARE @attributeId INT = 0;
-                WHILE @attributeId < @attributeRowCnt
-                BEGIN
-                    -- Inserting the claim mapped attribute.
-                    INSERT INTO IDN_CLAIM_MAPPED_ATTRIBUTE (LOCAL_CLAIM_ID, USER_STORE_DOMAIN_NAME, ATTRIBUTE_NAME, TENANT_ID) SELECT @genClaimId, USER_STORE_DOMAIN_NAME, ATTRIBUTE_NAME, @tenantId FROM @CLAIM_MAPPED_ATTRIBUTE WHERE DIALECT_ID =  @dialectId AND CLAIM_ID = @claimID AND ID = @attributeId;
-                    SET @attributeId += 1;
-                END
-
-                -- Looping through each claim property.
-                DECLARE @propertyRowCnt INT = (SELECT COUNT(CLAIM_ID) FROM @CLAIM_PROPERTY WHERE DIALECT_ID = @dialectId AND CLAIM_ID = @claimId);
-                DECLARE @propertyId INT = 0;
-                WHILE @propertyId < @propertyRowCnt
-                BEGIN
-                    -- Inserting the claim property.
-                    INSERT INTO IDN_CLAIM_PROPERTY (LOCAL_CLAIM_ID, PROPERTY_NAME, PROPERTY_VALUE, TENANT_ID) SELECT @genClaimId, PROPERTY_NAME, PROPERTY_VALUE, @tenantId FROM @CLAIM_PROPERTY WHERE DIALECT_ID =  @dialectId AND CLAIM_ID = @claimID AND ID = @propertyId;
-                    SET @propertyId += 1;
+                    -- Looping through each claim property.
+                    SET @propertyRowCnt = (SELECT COUNT(CLAIM_ID) FROM @CLAIM_PROPERTY WHERE DIALECT_ID = @dialectId AND CLAIM_ID = @claimId);
+                    SET @propertyId = 0;
+                    WHILE @propertyId < @propertyRowCnt
+                    BEGIN
+                        -- Inserting the claim property.
+                        INSERT INTO IDN_CLAIM_PROPERTY (LOCAL_CLAIM_ID, PROPERTY_NAME, PROPERTY_VALUE, TENANT_ID) SELECT @genClaimId, PROPERTY_NAME, PROPERTY_VALUE, @tenantId FROM @CLAIM_PROPERTY WHERE DIALECT_ID =  @dialectId AND CLAIM_ID = @claimID AND ID = @propertyId;
+                        SET @propertyId += 1;
+                    END
                 END
 
                 SET @claimId += 1;

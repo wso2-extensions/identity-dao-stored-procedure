@@ -35,6 +35,8 @@ import org.wso2.carbon.user.core.claim.inmemory.ClaimConfig;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
@@ -186,6 +188,7 @@ public class StoreProcedureBasedClaimConfigInitDAO implements ClaimConfigInitDAO
                         sqlCstmt.execute();
                         long delta = System.currentTimeMillis() - start;
                         logQueryDetails(sqlCstmt, CALL_INIT_CLAIM_CONFIG, delta, start);
+                        logStatementWarnings(sqlCstmt, tenantId);
                     } else {
                         String errorMessage = "Cannot process claim configuration init for the tenant: " + tenantId;
                         throw new ClaimMetadataException(errorMessage);
@@ -202,6 +205,28 @@ public class StoreProcedureBasedClaimConfigInitDAO implements ClaimConfigInitDAO
             throw new ClaimMetadataException(errorMessage, e);
         } finally {
             IdentityDatabaseUtil.closeConnection(dbConnection);
+        }
+    }
+
+    /**
+     * Log the informational messages raised by the stored procedure. The procedure skips claims it
+     * cannot fully persist, such as a remote claim whose mapped local claim URI is not declared as a
+     * local claim, and reports each one as a warning on the statement instead of failing the whole
+     * tenant claim configuration.
+     *
+     * @param stmt     Statement the procedure was executed with.
+     * @param tenantId Tenant the claim configuration is being initialized for.
+     */
+    private void logStatementWarnings(Statement stmt, int tenantId) {
+
+        try {
+            for (SQLWarning warning = stmt.getWarnings(); warning != null; warning = warning.getNextWarning()) {
+                log.warn("Claim configuration init for the tenant: " + tenantId + " reported: "
+                        + warning.getMessage());
+            }
+        } catch (SQLException e) {
+            log.warn("Error while reading the warnings of the claim configuration init for the tenant: "
+                    + tenantId, e);
         }
     }
 
